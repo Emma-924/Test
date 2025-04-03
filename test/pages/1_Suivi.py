@@ -21,22 +21,22 @@ notes = st.text_area("Notes")
 if st.button("Enregistrer"):
     data = pd.read_csv("data.csv")
     date_str = date.strftime("%Y-%m-%d")
-    if date_str not in data["Date"].astype(str).values:
-        new_data = pd.DataFrame([{
-            "Date": date,
-            "Glycémie (mg/dL)": glycemie,
-            "Insuline (U)": insuline,
-            "Glucides (g)": glucides,
-            "Activité physique (min)": activite,
-            "Notes": notes
-        }])
-        new_data.to_csv("data.csv", mode='a', header=False, index=False)
-        st.success("Données enregistrées avec succès !")
+    data = data[data["Date"] != date_str]
+    new_data = pd.DataFrame([{
+        "Date": date_str,
+        "Glycémie (mg/dL)": glycemie,
+        "Insuline (U)": insuline,
+        "Glucides (g)": glucides,
+        "Activité physique (min)": activite,
+        "Notes": notes
+    }])
+    updated_data = pd.concat([data, new_data])
+    updated_data.to_csv("data.csv", index=False)
+    st.success("Données enregistrées avec succès !")
 
 st.markdown(
     """
     <style>
-    /* Augmente l’espace horizontal entre les onglets */
     [data-testid="stTabs"] button {
         margin-right: 20px;
     }
