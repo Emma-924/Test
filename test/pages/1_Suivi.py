@@ -10,7 +10,6 @@ if not os.path.exists("data.csv"):
 
 st.title("Suivi quotidien")
 
-# Formulaire de saisie
 date = st.date_input("Date", value=datetime.today())
 glycemie = st.number_input("Glycémie (mg/dL)", min_value=0)
 insuline = st.number_input("Insuline (U)", min_value=0)
@@ -18,25 +17,58 @@ glucides = st.number_input("Glucides (g)", min_value=0)
 activite = st.number_input("Activité physique (min)", min_value=0)
 notes = st.text_area("Notes")
 
+data = pd.read_csv("data.csv")
+date_str = date.strftime("%Y-%m-%d")
+
+if "overwrite_confirm" not in st.session_state:
+    st.session_state.overwrite_confirm = False
+
 if st.button("Enregistrer"):
-    data = pd.read_csv("data.csv")
-    date_str = date.strftime("%Y-%m-%d")
-    data = data[data["Date"] != date_str]
-    new_data = pd.DataFrame([{
-        "Date": date_str,
-        "Glycémie (mg/dL)": glycemie,
-        "Insuline (U)": insuline,
-        "Glucides (g)": glucides,
-        "Activité physique (min)": activite,
-        "Notes": notes
-    }])
-    updated_data = pd.concat([data, new_data])
-    updated_data.to_csv("data.csv", index=False)
-    st.success("Données enregistrées avec succès !")
+    if date_str in data["Date"].astype(str).values:
+        st.error("Données déjà enregistrées pour cette date.")
+        st.session_state.overwrite_confirm = True
+    else:
+        new_data = pd.DataFrame([{
+            "Date": date_str,
+            "Glycémie (mg/dL)": glycemie,
+            "Insuline (U)": insuline,
+            "Glucides (g)": glucides,
+            "Activité physique (min)": activite,
+            "Notes": notes
+        }])
+        new_data.to_csv("data.csv", mode='a', header=False, index=False)
+        st.success("Données enregistrées avec succès !")
+
+if st.session_state.overwrite_confirm:
+    choix = st.selectbox(
+        "Voulez-vous écraser les données existantes ?",
+        options=["", "Oui", "Non"],
+        format_func=lambda x: "Sélectionnez une option" if x == "" else x,
+        key="selectbox_overwrite"
+    )
+    if choix == "Oui":
+        if st.button("Écraser et enregistrer"):
+            st.session_state.overwrite_confirm = False
+            data = data[data["Date"].astype(str) != date_str]  
+            new_data = pd.DataFrame([{
+                "Date": date_str,
+                "Glycémie (mg/dL)": glycemie,
+                "Insuline (U)": insuline,
+                "Glucides (g)": glucides,
+                "Activité physique (min)": activite,
+                "Notes": notes
+            }])
+            updated_data = pd.concat([data, new_data])
+            updated_data.to_csv("data.csv", index=False)
+            st.success("Données écrasées et enregistrées avec succès !")
+    elif choix == "Non":
+        st.info("Les anciennes données ont été conservées.")
+        st.session_state.overwrite_confirm = False
 
 st.markdown(
     """
     <style>
+    /* Augmente l’espace horizontal entre les onglets */
     [data-testid="stTabs"] button {
         margin-right: 20px;
     }
