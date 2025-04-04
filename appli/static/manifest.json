@@ -1,0 +1,22 @@
+{
+    "name": "Mon Appli",
+    "short_name": "Appli",
+    "start_url": "/",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone"],
+    "orientation": "portrait",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+      {
+        "src": "/Users/Emma2/Desktop/test/appli/static/AppIcon192@2x.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/Users/Emma2/Desktop/test/appli/static/AppIcon512@2x.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+}
